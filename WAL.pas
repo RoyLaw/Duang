@@ -14,7 +14,7 @@ uses
 
 type
   TUser = record // ÓÃ»§ÕË»§
-    userame: string;
+    username: string;
     password: string;
   end;
 
@@ -40,6 +40,7 @@ type
 
     function logIn(thisUser: TUser): string; // µÇÂ½
     function checkInAndOut(thisUser: TUser): string; // ¿¼ÇÚ
+    procedure cleanUp();
 
   end;
 
@@ -51,7 +52,7 @@ function TWebAccess.checkInAndOut(thisUser: TUser): string;
 begin
   // reform params for check-in and check-out actions.
   postParams.Clear;
-  postParams.Add('userName=' + thisUser.userame);
+  postParams.Add('userName=' + thisUser.username);
   postParams.Add('singFlag=1');
 
   aIdHTTP.Request.Referer :=
@@ -61,10 +62,20 @@ begin
       postParams);
   except
     on E: Exception do
-      Result := 'ERROR occured when check-in or check-out.' + #13#10 +
+      Result := 'Error occured when check-in or check-out.' + #13#10 +
         E.Message;
   end;
 
+end;
+
+procedure TWebAccess.cleanUp;
+begin
+  // do some memory clean up.
+  aIdHTTP.Free;
+  aIdSSLIOHandlerSocketOpenSSL.Free;
+  aCookie.Free;
+  aIdCompressorZLib.Free;
+  postParams.Free;
 end;
 
 procedure TWebAccess.Execute;
@@ -112,7 +123,7 @@ begin
   // aIdHTTP.ProxyParams.ProxyServer := '';
   // aIdHTTP.ProxyParams.ProxyPort := '';
 
-  postParams.Add('username=' + thisUser.userame);
+  postParams.Add('username=' + thisUser.username);
   postParams.Add('password=' + thisUser.password);
   // postParams.Add('lt=_c1FE7477B-DFB4-415E-9750-9EE7B6A76405_k1F8DD927-4404-5D89-F42B-AE2B869EC4DD');
   postParams.Add('_eventId=submit');

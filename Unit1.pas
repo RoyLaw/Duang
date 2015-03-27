@@ -31,15 +31,16 @@ uses WAL;
 
 var
   curUser: TUser;
-  curAccess: TWebaccess;
+  curAccess: TWebAccess;
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  curUser.userame := 'jsy';
+  curUser.username := 'jsy';
   curUser.password := '111111';
-  curAccess := TWebaccess.Create;
-  Memo1.Lines.Text :=curAccess.logIn(curUser);
-  Memo2.Lines.Text :=curAccess.checkInAndOut(curUser);
+  curAccess := TWebAccess.Create;
+  Memo1.Lines.Text := curAccess.logIn(curUser);
+  Memo2.Lines.Text := curAccess.checkInAndOut(curUser);
+  curAccess.cleanUp;
 end;
 
 end.
