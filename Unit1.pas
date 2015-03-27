@@ -35,7 +35,7 @@ var
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  curUser.userame := 'lzy';
+  curUser.userame := 'jsy';
   curUser.password := '111111';
   curAccess := TWebaccess.Create;
   Memo1.Lines.Text :=curAccess.logIn(curUser);
