@@ -40,6 +40,7 @@ type
 
     function logIn(thisUser: TUser): string; // µÇÂ½
     function checkInAndOut(thisUser: TUser): string; // ¿¼ÇÚ
+    procedure warmUp();
     procedure cleanUp();
 
   end;
@@ -70,7 +71,7 @@ end;
 
 procedure TWebAccess.cleanUp;
 begin
-  // do some memory clean up.
+  // destruction for varibles.
   aIdHTTP.Free;
   aIdSSLIOHandlerSocketOpenSSL.Free;
   aCookie.Free;
@@ -95,13 +96,6 @@ function TWebAccess.logIn(thisUser: TUser): string;
 begin
   // init
   // COINITIALIZE(nil);
-
-  postParams := TStringList.Create;
-
-  aIdHTTP := TIdHTTP.Create();
-  aIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create();
-  aCookie := TIdCookieManager.Create();
-  aIdCompressorZLib := TIdCompressorZLib.Create();
 
   aIdHTTP.AllowCookies := True;
   aIdHTTP.CookieManager := aCookie;
@@ -145,6 +139,17 @@ begin
 
   // CoUninitialize;
 
+end;
+
+procedure TWebAccess.warmUp;
+begin
+  // initialization for variables.
+  postParams := TStringList.Create;
+
+  aIdHTTP := TIdHTTP.Create();
+  aIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create();
+  aCookie := TIdCookieManager.Create();
+  aIdCompressorZLib := TIdCompressorZLib.Create();
 end;
 
 end.
