@@ -10,7 +10,7 @@ uses
   Soap.SOAPHTTPClient, IdBaseComponent, IdComponent, IdIOHandler,
   IdCookieManager,
   IdIOHandlerSocket, IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdTCPConnection,
-  IdTCPClient, IdHTTP, Vcl.StdCtrls, IdCompressorZLib;
+  IdTCPClient, IdHTTP, Vcl.StdCtrls, IdCompressorZLib, ActiveX;
 
 type
   TUser = record // 用户账户
@@ -28,13 +28,18 @@ type
     aUser: TUser;
     postParams: TStrings; // POST提交请求的参数
 
+  protected
+    { Protected declarations }
+    procedure Execute; override;
+
   private
     { Private declarations }
+
   public
     { Public declarations }
 
-    function logIn(thisUser: TUser): bool; // 登陆
-    function checkInAndOut(thisUser: TUser): bool; // 考勤
+    function logIn(thisUser: TUser): string; // 登陆
+    function checkInAndOut(thisUser: TUser): string; // 考勤
 
   end;
 
@@ -42,25 +47,54 @@ implementation
 
 { TWebAccess }
 
-function TWebAccess.checkInAndOut(thisUser: TUser): bool;
+function TWebAccess.checkInAndOut(thisUser: TUser): string;
 begin
+  // reform params for check-in and check-out actions.
+  postParams.Clear;
+  postParams.Add('userName=' + thisUser.userame);
+  postParams.Add('singFlag=1');
+
+  aIdHTTP.Request.Referer :=
+    'http://10.1.30.89/jttoa/checkwork/checkWorkDocumentary/checkWorkDocumentaryList.jsp';
+  try
+    Result := aIdHTTP.Post('http://10.1.30.89/jttoa/checkWorkController/doSign',
+      postParams);
+  except
+    on E: Exception do
+      Result := 'ERROR occured when check-in or check-out.' + #13#10 +
+        E.Message;
+  end;
 
 end;
 
-function TWebAccess.logIn(thisUser: TUser): bool;
+procedure TWebAccess.Execute;
+begin
+  inherited;
+  try
+    // some action
+  except
+    on E: Exception do
+    begin
+      showmessage(E.Message);
+    end;
+  end;
+end;
+
+function TWebAccess.logIn(thisUser: TUser): string;
 begin
   // init
+  // COINITIALIZE(nil);
 
-  postParams := TStrings.Create;
+  postParams := TStringList.Create;
 
   aIdHTTP := TIdHTTP.Create();
   aIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create();
   aCookie := TIdCookieManager.Create();
   aIdCompressorZLib := TIdCompressorZLib.Create();
 
-  aIdHTTP.AllowCookies := TRUE;
+  aIdHTTP.AllowCookies := True;
   aIdHTTP.CookieManager := aCookie;
-  aIdHTTP.HandleRedirects := TRUE;
+  aIdHTTP.HandleRedirects := True;
 
   aIdSSLIOHandlerSocketOpenSSL.SSLOptions.Method := sslvSSLv3;
   aIdHTTP.IOHandler := aIdSSLIOHandlerSocketOpenSSL;
@@ -86,17 +120,19 @@ begin
   postParams.Add('submit.y=8');
 
   try
-    aIdHTTP.Post
+    Result := aIdHTTP.Post
       ('https://10.1.30.89:8443/cas/login?service=http%3A%2F%2F10.1.30.89%2Fmain.jsp',
       postParams);
-    Result := TRUE;
+
   except
     on E: Exception do
     begin
-      ShowMessage('ERR: Can''t Login.' + E.Message);
-      Result := FALSE;
+      // showmessage('ERR: Can''t Login.' + E.Message);
+      Result := 'Error occured when log-in.' + #13#10 + E.Message;
     end;
   end;
+
+  // CoUninitialize;
 
 end;
 
