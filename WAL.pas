@@ -5,7 +5,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  System.Classes, Vcl.Graphics, System.JSON,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Soap.InvokeRegistry, Soap.Rio,
   Soap.SOAPHTTPClient, IdBaseComponent, IdComponent, IdIOHandler,
   IdCookieManager,
@@ -27,6 +27,8 @@ type
 
     aUser: TUser;
     postParams: TStrings; // POST提交请求的参数
+
+    JSONObject: TJSONObject; // 解析考勤返回的JSON数据
 
   protected
     { Protected declarations }
@@ -50,6 +52,8 @@ implementation
 { TWebAccess }
 
 function TWebAccess.checkInAndOut(thisUser: TUser): string;
+var
+  tmpHTTPResp: string;
 begin
   // reform params for check-in and check-out actions.
   postParams.Clear;
@@ -58,15 +62,24 @@ begin
 
   aIdHTTP.Request.Referer :=
     'http://10.1.30.89/jttoa/checkwork/checkWorkDocumentary/checkWorkDocumentaryList.jsp';
+
+  tmpHTTPResp := '';
   try
-    Result := aIdHTTP.Post('http://10.1.30.89/jttoa/checkWorkController/doSign',
-      postParams);
+    begin
+      tmpHTTPResp := aIdHTTP.Post
+        ('http://10.1.30.89/jttoa/checkWorkController/doSign', postParams);
+      JSONObject := TJSONObject.ParseJSONValue(Trim(tmpHTTPResp))
+        as TJSONObject;
+      Result := JSONObject.Values['success'].ToString;
+    end;
   except
     on E: Exception do
-      Result := 'Error occured when check-in or check-out.' + #13#10 +
-        E.Message;
+    begin
+      ShowMessage('Error occured when check-in or check-out.' + #13#10 +
+        E.Message);
+      Result := '';
+    end;
   end;
-
 end;
 
 procedure TWebAccess.cleanUp;
@@ -77,6 +90,7 @@ begin
   aCookie.Free;
   aIdCompressorZLib.Free;
   postParams.Free;
+  JSONObject.Free;
 end;
 
 procedure TWebAccess.Execute;
@@ -87,7 +101,7 @@ begin
   except
     on E: Exception do
     begin
-      showmessage(E.Message);
+      ShowMessage(E.Message);
     end;
   end;
 end;
@@ -150,6 +164,10 @@ begin
   aIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create();
   aCookie := TIdCookieManager.Create();
   aIdCompressorZLib := TIdCompressorZLib.Create();
+
+  JSONObject := TJSONObject.Create;
+  JSONObject := nil;
+
 end;
 
 end.
