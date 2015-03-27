@@ -41,7 +41,8 @@ type
     { Public declarations }
 
     function logIn(thisUser: TUser): string; // µÇÂ½
-    function checkInAndOut(thisUser: TUser): string; // ¿¼ÇÚ
+    function checkInAndOut(thisUser: TUser; actionOfCheck: integer): string;
+    // ¿¼ÇÚ
     procedure warmUp();
     procedure cleanUp();
 
@@ -51,14 +52,19 @@ implementation
 
 { TWebAccess }
 
-function TWebAccess.checkInAndOut(thisUser: TUser): string;
+function TWebAccess.checkInAndOut(thisUser: TUser;
+  actionOfCheck: integer): string;
 var
-  tmpHTTPResp: string;
+  tmpHTTPResp: string; // temporary string for HTTP Response in XML format.
 begin
+  // normalize actionOfCheck variable
+  if (actionOfCheck <> 1) and (actionOfCheck <> 2) then
+    actionOfCheck := 1;
+
   // reform params for check-in and check-out actions.
   postParams.Clear;
   postParams.Add('userName=' + thisUser.username);
-  postParams.Add('singFlag=1');
+  postParams.Add('singFlag=' + actionOfCheck.ToString);
 
   aIdHTTP.Request.Referer :=
     'http://10.1.30.89/jttoa/checkwork/checkWorkDocumentary/checkWorkDocumentaryList.jsp';
@@ -77,7 +83,7 @@ begin
     begin
       ShowMessage('Error occured when check-in or check-out.' + #13#10 +
         E.Message);
-      Result := '';
+      Result := 'false';
     end;
   end;
 end;

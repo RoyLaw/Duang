@@ -35,12 +35,12 @@ var
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  curUser.username := 'jsy';
+  curUser.username := 'hzh';
   curUser.password := '111111';
   curAccess := TWebAccess.Create;
   curAccess.warmUp;
-  Memo1.Lines.Text := curAccess.logIn(curUser);
-  Memo2.Lines.Text := curAccess.checkInAndOut(curUser);
+  // Memo1.Lines.Text := curAccess.logIn(curUser);
+  Memo2.Lines.Text := curAccess.checkInAndOut(curUser, 1);
   curAccess.cleanUp;
   curAccess.Free;
 end;
