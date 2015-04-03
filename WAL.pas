@@ -8,7 +8,7 @@ uses
   System.Classes, Vcl.Graphics, System.JSON,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Soap.InvokeRegistry, Soap.Rio,
   Soap.SOAPHTTPClient, IdBaseComponent, IdComponent, IdIOHandler,
-  IdCookieManager,
+  IdCookieManager,frmMainUnit,
   IdIOHandlerSocket, IdIOHandlerStack, IdSSL, IdSSLOpenSSL, IdTCPConnection,
   IdTCPClient, IdHTTP, Vcl.StdCtrls, IdCompressorZLib, ActiveX;
 
@@ -39,9 +39,8 @@ type
 
   public
     { Public declarations }
-
     function logIn(thisUser: TUser): string; // µÇÂ½
-    function checkInAndOut(thisUser: TUser; actionOfCheck: integer): string;
+    function checkInAndOut(thisUser: TUser; actionOfCheck: integer): BOOL;
     // ¿¼ÇÚ
     procedure warmUp();
     procedure cleanUp();
@@ -53,9 +52,10 @@ implementation
 { TWebAccess }
 
 function TWebAccess.checkInAndOut(thisUser: TUser;
-  actionOfCheck: integer): string;
+  actionOfCheck: integer): BOOL;
 var
   tmpHTTPResp: string; // temporary string for HTTP Response in XML format.
+  strTempResult: string;
 begin
   // normalize actionOfCheck variable
   if (actionOfCheck <> 1) and (actionOfCheck <> 2) then
@@ -76,14 +76,17 @@ begin
         ('http://10.1.30.89/jttoa/checkWorkController/doSign', postParams);
       JSONObject := TJSONObject.ParseJSONValue(Trim(tmpHTTPResp))
         as TJSONObject;
-      Result := JSONObject.Values['success'].ToString;
+      strTempResult := JSONObject.Values['success'].ToString;
+      if LowerCase(strTempResult) = 'true' then
+        Result := true
+      else
+        Result := false;
     end;
   except
     on E: Exception do
     begin
-      ShowMessage('Error occured when check-in or check-out.' + #13#10 +
-        E.Message);
-      Result := 'false';
+      frmMain.LogMessage('CHK-IN-OUT Action Error:' + E.Message);
+      Result := false;
     end;
   end;
 end;
@@ -117,9 +120,9 @@ begin
   // init
   // COINITIALIZE(nil);
 
-  aIdHTTP.AllowCookies := True;
+  aIdHTTP.AllowCookies := true;
   aIdHTTP.CookieManager := aCookie;
-  aIdHTTP.HandleRedirects := True;
+  aIdHTTP.HandleRedirects := true;
 
   aIdSSLIOHandlerSocketOpenSSL.SSLOptions.Method := sslvSSLv3;
   aIdHTTP.IOHandler := aIdSSLIOHandlerSocketOpenSSL;

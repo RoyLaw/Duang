@@ -1,48 +1,46 @@
-unit Unit1;
+unit Unit2;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, WAL;
 
 type
-  TForm1 = class(TForm)
-    Button1: TButton;
-    Memo1: TMemo;
-    Memo2: TMemo;
-    procedure Button1Click(Sender: TObject);
-
+  TForm2 = class(TForm)
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
     { Public declarations }
+
   end;
 
 var
-  Form1: TForm1;
+  Form2: TForm2;
 
 implementation
 
 {$R *.dfm}
 
-uses WAL;
-
 var
   curUser: TUser;
   curAccess: TWebAccess;
 
-procedure TForm1.Button1Click(Sender: TObject);
+  { TForm2 }
+
+procedure TForm2.FormCreate(Sender: TObject);
 begin
-  curUser.username := 'hzh';
+  curUser.username := 'luoyi';
   curUser.password := '111111';
   curAccess := TWebAccess.Create;
   curAccess.warmUp;
   // Memo1.Lines.Text := curAccess.logIn(curUser);
-  Memo2.Lines.Text := curAccess.checkInAndOut(curUser, 1);
+  curAccess.checkInAndOut(curUser, 1);
   curAccess.cleanUp;
   curAccess.Free;
+  Application.Terminate;
 end;
 
 end.

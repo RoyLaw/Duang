@@ -2,14 +2,16 @@ program Duang;
 
 uses
   Vcl.Forms,
-  Unit1 in 'Unit1.pas' {Form1},
-  WAL in 'WAL.pas';
+  frmMainUnit in 'frmMainUnit.pas' {frmMain},
+  WAL in 'WAL.pas',
+  lcgsmSMS_TLB in '..\..\Embarcadero\Studio\15.0\Imports\lcgsmSMS_TLB.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.Title := 'Duang';
+  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.
