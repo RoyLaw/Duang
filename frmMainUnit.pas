@@ -241,15 +241,17 @@ begin
     j := i;
     if (objSMS.InboxPhone[j] = '+8618606198301') or
       (objSMS.InboxPhone[j] = '+8615851808999') then
+    begin
       LogMessage('A valid message has been recevied.');
 
-    if ProceedValidMessage(objSMS.InboxMessage[j], objSMS.InboxPhone[j]) then
-      SendCustomSMS('Congrates! Your request ' +
-        QuotedStr(objSMS.InboxMessage[j]) + ' is succeded.',
-        objSMS.InboxPhone[j])
-    else
-      SendCustomSMS('Sorry. Your request ' + QuotedStr(objSMS.InboxMessage[j]) +
-        ' is failed. Please try it again.', objSMS.InboxPhone[j]);
+      if ProceedValidMessage(objSMS.InboxMessage[j], objSMS.InboxPhone[j]) then
+        SendCustomSMS('Congrates! Your request ' +
+          QuotedStr(objSMS.InboxMessage[j]) + ' is succeded.',
+          objSMS.InboxPhone[j])
+      else
+        SendCustomSMS('Sorry. Your request ' + QuotedStr(objSMS.InboxMessage[j])
+          + ' is failed. Please try it again.', objSMS.InboxPhone[j]);
+    end;
   end;
 end;
 
