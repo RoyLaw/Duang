@@ -126,7 +126,7 @@ end;
 
 procedure TfrmMain.btnCloseCOMPortClick(Sender: TObject);
 begin
-  If objSMS.OpenCOMPort Then
+  If objSMS.CloseCOMPort Then
   begin
     ShowMessage('Successfully closed the specified COM port.');
   end
