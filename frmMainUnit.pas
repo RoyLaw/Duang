@@ -1,5 +1,5 @@
 unit frmMainUnit;
-
+
 interface
 
 uses
@@ -42,6 +42,8 @@ type
 
     procedure InitSMSComm;
     procedure InitReadSMSService;
+
+    procedure AutoInit; // 自动配置后开始运行
 
     procedure CheckValidMessages;
     function ProceedValidMessage(strValidMsg: string;
@@ -126,7 +128,7 @@ end;
 
 procedure TfrmMain.btnCloseCOMPortClick(Sender: TObject);
 begin
-  If objSMS.OpenCOMPort Then
+  If objSMS.CloseCOMPort Then
   begin
     ShowMessage('Successfully closed the specified COM port.');
   end
@@ -277,6 +279,10 @@ begin
   memLogMsg.Clear;
   InitSMSComm;
   InitReadSMSService;
+
+  // 自动运行开始
+  AutoInit;
+
   // objAccess.cleanUp;
   // objAccess.Free;
 
@@ -607,4 +613,29 @@ begin
   end;
 end;
 
+procedure TfrmMain.AutoInit;
+begin
+
+  cboPort.ItemIndex := 1; // 更改端口为COM1
+  cboBaudRate.ItemIndex := 5; // 更改波特率为9600
+  edtInterval.Text := '12'; // 更改刷新时间为12秒
+  cboMsgMemory.ItemIndex := 1; // 更改操作内存为手机收信箱
+
+  if objSMS.OpenCOMPort then
+  begin
+    if objSMS.InboxClear then // 清空收件箱
+      LogMessage('Inbox Cleared.');
+
+    chkInboxTimer.Checked := True; // 开始循环监视短信
+
+    LogMessage('Initialization Finished. Starting Monitoring.');
+  end
+  Else
+    LogMessage('ERR: Initialization Failed.');
+
+  WindowState := wsMinimized; // 隐藏窗体
+
+end;
+
 end.
+
