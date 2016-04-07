@@ -1,5 +1,5 @@
 unit frmMainUnit;
-
+
 interface
 
 uses
@@ -42,6 +42,8 @@ type
 
     procedure InitSMSComm;
     procedure InitReadSMSService;
+
+    procedure AutoInit; // 自动配置后开始运行
 
     procedure CheckValidMessages;
     function ProceedValidMessage(strValidMsg: string;
@@ -277,6 +279,10 @@ begin
   memLogMsg.Clear;
   InitSMSComm;
   InitReadSMSService;
+
+  // 自动运行开始
+  AutoInit;
+
   // objAccess.cleanUp;
   // objAccess.Free;
 
@@ -607,4 +613,42 @@ begin
   end;
 end;
 
+procedure TfrmMain.AutoInit;
+var
+  ReadType: smallint;
+begin
+
+  objSMS.COMPort := 'COM1'; // 更改端口为COM1
+  objSMS.BaudRate := 9600; // 更改波特率为9600
+  objSMS.Parity := 'N';
+  objSMS.DataBits := 8;
+  objSMS.StopBits := '1';
+  objSMS.FlowControl := 0;
+  objSMS.InboxMemory := 'ME'; // 更改操作内存为手机收信箱
+
+  edtInterval.Text := '10'; // 更改刷新时间为12秒
+
+  if objSMS.OpenCOMPort then
+  begin
+    ReadType := 4;
+    objSMS.ReadInbox(ReadType);
+    if objSMS.InboxCount > 0 then // 清空收件箱
+    begin
+      objSMS.InboxClear;
+      LogMessage('Inbox Cleared.');
+    end;
+    chkInboxTimer.Checked := True; // 开始循环监视短信
+
+    LogMessage('Initialization Finished. Starting Monitoring.');
+  end
+  Else
+  begin
+    objSMS.CloseCOMPort;
+    LogMessage('ERR: Initialization Failed.');
+  end;
+   WindowState := wsMinimized; // 隐藏窗体
+
+end;
+
 end.
+
